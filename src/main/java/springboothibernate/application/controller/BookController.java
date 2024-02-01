@@ -1,5 +1,8 @@
 package springboothibernate.application.controller;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import springboothibernate.application.model.Book;
@@ -12,6 +15,9 @@ import java.util.stream.Collectors;
 
 @RestController
 public class BookController {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private BookService bookService;
 
     @Autowired
@@ -31,8 +37,8 @@ public class BookController {
     }
 
     @GetMapping(value = "find")
-    public List<Book> findByName(@RequestParam String name){
-        return this.bookService.findByTitle(name);
+    public List<Book> findByName(@RequestParam String title){
+        return this.bookService.findByTitle(title);
     }
 
     @PostMapping(value = "saveOneBook")
@@ -43,5 +49,15 @@ public class BookController {
     @PostMapping(value = "saveMultipleBooks")
     public List<Book> saveMultipleBooks(@RequestBody List<Book> booksList) {
         return this.bookService.saveAllBooks(booksList);
+    }
+
+    @Transactional
+    @DeleteMapping(value = "deleteBook/{id}")
+    public void deleteBook(@PathVariable Long id) {
+        Book book = entityManager.find(Book.class, id);
+
+        if(book != null) {
+            entityManager.remove(book);
+        }
     }
 }
