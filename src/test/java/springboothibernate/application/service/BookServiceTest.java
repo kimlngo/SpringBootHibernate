@@ -22,6 +22,27 @@ public class BookServiceTest {
     public void testWhenApplicationStart() {
         List<Book> bookList = bookService.list();
         Assertions.assertEquals(bookList.size(), 3);
+    }
 
+    @Test
+    public void testSaveOneNewBook() {
+        Book bookToSave = new Book("Design Pattern in Guru");
+        Book returnBook = bookService.saveOneBook(bookToSave);
+
+        Assertions.assertEquals(bookToSave.getTitle(), returnBook.getTitle());
+        Assertions.assertNotNull(returnBook.getId());
+    }
+
+    @Test
+    public void testSaveMultipleBooks() {
+        List<Book> booksList = List.of(
+                new Book("Microservice Patterns"),
+                new Book("Java Generics"));
+
+        List<Book> returnBookList = bookService.saveAllBooks(booksList);
+        Assertions.assertEquals(returnBookList.size(), 2);
+        Assertions.assertTrue(returnBookList.stream()
+                                            .map(Book::getTitle)
+                                            .anyMatch(title -> "Microservice Patterns".equals(title)));
     }
 }

@@ -20,7 +20,15 @@ public class BookService {
         return bookRepository.findAll();
     }
 
-    public List<Book> findByName(String name) {
-        return bookRepository.findByName(name);
+    public List<Book> findByTitle(String name) {
+        return bookRepository.findByTitle(name);
+    }
+
+    public Book saveOneBook(Book bookToSave) {
+        return bookRepository.saveAndFlush(bookToSave);
+    }
+
+    public List<Book> saveAllBooks(List<Book> booksList) {
+        return bookRepository.saveAllAndFlush(booksList);
     }
 }
