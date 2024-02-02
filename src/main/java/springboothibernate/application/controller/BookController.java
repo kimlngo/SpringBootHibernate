@@ -1,22 +1,21 @@
 package springboothibernate.application.controller;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import springboothibernate.application.model.Book;
 import springboothibernate.application.service.BookService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+
 @RestController
 public class BookController {
-    @PersistenceContext
-    private EntityManager entityManager;
 
     private BookService bookService;
 
@@ -26,38 +25,45 @@ public class BookController {
     }
 
     @GetMapping(value = "listAll")
-    public List<Book> listAllBooks() {
-        return this.bookService.list();
+    public ResponseEntity<List<Book>> listAllBooks() {
+        return new ResponseEntity<>(this.bookService.list(), HttpStatus.OK);
     }
 
     @GetMapping(value = "getAllBookMap")
-    public Map<Long, Book> getAllBookMap() {
-        return this.bookService.list().stream()
-                .collect(Collectors.toMap(Book::getId, Function.identity()));
+    public ResponseEntity<Map<Long, Book>> getAllBookMap() {
+        return new ResponseEntity<>(this.bookService.list()
+                                                    .stream()
+                                                    .collect(Collectors.toMap(Book::getId, Function.identity())), HttpStatus.OK);
     }
 
     @GetMapping(value = "find")
-    public List<Book> findByName(@RequestParam String title){
-        return this.bookService.findByTitle(title);
+    public ResponseEntity<List<Book>> findByName(@RequestParam String title){
+        return new ResponseEntity<>(this.bookService.findByTitle(title), HttpStatus.OK);
     }
 
     @PostMapping(value = "saveOneBook")
-    public Book saveOneBook(@RequestBody Book bookToSave) {
-        return this.bookService.saveOneBook(bookToSave);
+    public ResponseEntity<Book> saveOneBook(@RequestBody Book bookToSave) {
+        return new ResponseEntity<>(this.bookService.saveOneBook(bookToSave), HttpStatus.CREATED);
     }
 
     @PostMapping(value = "saveMultipleBooks")
-    public List<Book> saveMultipleBooks(@RequestBody List<Book> booksList) {
-        return this.bookService.saveAllBooks(booksList);
+    public ResponseEntity<List<Book>> saveMultipleBooks(@RequestBody List<Book> booksList) {
+        return new ResponseEntity<>(this.bookService.saveMultipleBooks(booksList), HttpStatus.CREATED);
     }
 
-    @Transactional
-    @DeleteMapping(value = "deleteBook/{id}")
-    public void deleteBook(@PathVariable Long id) {
-        Book book = entityManager.find(Book.class, id);
-
-        if(book != null) {
-            entityManager.remove(book);
+    @PutMapping(value = "updateBook/{id}")
+    public ResponseEntity<Book> updateBook(@RequestBody Book bookToUpdate, @PathVariable Long id) {
+        Optional<Book> bookOpt = this.bookService.updateBookById(bookToUpdate, id);
+        if (bookOpt.isPresent()) {
+            return new ResponseEntity<>(bookOpt.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+
+    @DeleteMapping(value = "deleteBook/{id}")
+    public ResponseEntity deleteBook(@PathVariable Long id) {
+        bookService.deleteBook(id);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
