@@ -1,8 +1,11 @@
 package springboothibernate.application.service;
 
 
+import org.apache.logging.log4j.simple.SimpleLogger;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -15,6 +18,7 @@ import java.util.Optional;
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BookServiceTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BookServiceTest.class);
 
     @Autowired
     private BookService bookService;
@@ -23,6 +27,7 @@ public class BookServiceTest {
     @Order(1)
     public void testWhenApplicationStart() {
         List<Book> bookList = bookService.list();
+        LOGGER.debug("bookList: " + bookList);
         Assertions.assertEquals(3, bookList.size());
     }
 
